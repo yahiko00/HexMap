@@ -187,3 +187,9 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+
+*.config
+*.sln
+*.csproj
+doc/dev/
+*.gitignore

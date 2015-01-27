@@ -5,3 +5,12 @@
 span {
     font-style: italic;
 }
+
+#content {
+    position: absolute;
+}
+
+#parameters {
+  float: right;
+  padding-right: 5em;
+}

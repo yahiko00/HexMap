@@ -33,22 +33,58 @@ window.onload = () => {
     ]);
 
   // Listeners
-  $("#flatTopped").on("change", changeOrientation);
-  $("#pointyTopped").on("change", changeOrientation);
+  $('#flatTopped').on('change', changeOrientation);
+  $('#pointyTopped').on('change', changeOrientation);
+  $('#oddOffset').on('change', changeLayoutOffset);
+  $('#evenOffset').on('change', changeLayoutOffset);
+  $('#yesGrid').on('change', changeShowGrid);
+  $('#noGrid').on('change', changeShowGrid);
+  $('#yesTransition').on('change', changeShowTransition);
+  $('#noTransition').on('change', changeShowTransition);
   $('#generate').on('click', generate);
 
 };
 
 function changeOrientation() {
-  var flatRadioHTML = <HTMLInputElement>document.getElementById("flatTopped");
-  var pointyRadioHTML = <HTMLInputElement>document.getElementById("pointyTopped");
+  var flatRadioHTML = <HTMLInputElement>document.getElementById('flatTopped');
+  var pointyRadioHTML = <HTMLInputElement>document.getElementById('pointyTopped');
 
   if (flatRadioHTML.checked) Hexagon.flatTopped = true;
   else if (pointyRadioHTML.checked) Hexagon.flatTopped = false;
 
-  generate();
+  Game.generate();
 } // changeOrientation
 
-function generate() {
+function changeLayoutOffset() {
+  var oddRadioHTML = <HTMLInputElement>document.getElementById('oddOffset');
+  var evenRadioHTML = <HTMLInputElement>document.getElementById('evenOffset');
+
+  if (oddRadioHTML.checked) Hexagon.evenOffset = false;
+  else if (evenRadioHTML.checked) Hexagon.evenOffset = true;
+
+  Game.generate();
+} // changeLayoutOffset
+
+function changeShowGrid() {
+  var yesRadioHTML = <HTMLInputElement>document.getElementById('yesGrid');
+  var noRadioHTML = <HTMLInputElement>document.getElementById('noGrid');
+
+  if (yesRadioHTML.checked) Game.showGrid = true;
+  else if (noRadioHTML.checked) Game.showGrid = false;
+
   Game.refresh();
+} // changeshowGrid
+
+function changeShowTransition() {
+  var yesRadioHTML = <HTMLInputElement>document.getElementById('yesTransition');
+  var noRadioHTML = <HTMLInputElement>document.getElementById('noTransition');
+
+  if (yesRadioHTML.checked) Game.showTransition = true;
+  else if (noRadioHTML.checked) Game.showTransition = false;
+
+  Game.refresh();
+} // changeShowTransition
+
+function generate() {
+  Game.generate();
 } // generate

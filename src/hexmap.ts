@@ -39,13 +39,18 @@ module Game {
   export var baseTerrainPointyImages: HTMLImageElement[];
   export var transitionPointyImages: HTMLImageElement[];
 
+  export var showGrid: boolean;
+  export var showTransition: boolean;
+
   export function init(container: HTMLElement, folder: string, baseTerrainFlatFilenames, transitionFlatFilenames, baseTerrainPointyFilenames, transitionPointyFilenames: string[]) {
-    Game.container = container;
+    Game.showGrid = true;
+    Game.showTransition = true;
     Game.folder = folder;
     Game.baseTerrainFlatFilenames = baseTerrainFlatFilenames;
     Game.transitionFlatFilenames = transitionFlatFilenames;
     Game.baseTerrainPointyFilenames = baseTerrainPointyFilenames;
     Game.transitionPointyFilenames = transitionPointyFilenames;
+    Game.container = container;
 
     Hexagon.init(10, 8, 72, 72, true, true); // Flat-topped hexagons, even-q layout
 
@@ -63,18 +68,22 @@ module Game {
           baseTerrainPointyImages = images;
           loadImages(folder, transitionPointyFilenames, (images: HTMLImageElement[]) => {
             transitionPointyImages = images;
-            refresh.call(this);
+            generate.call(this);
           });
         });
       });
     });
   } // init
 
-  export function refresh() {
+  export function generate() {
     Hexagon.generate();
+    refresh();
+  } // generate;
+
+  export function refresh() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawMap();
-  } // refresh;
+  } // refresh
 
   function drawMap() {
     for (var i = 0; i < Hexagon.mapWidth; i++) {
@@ -105,17 +114,21 @@ module Game {
         break;
       case BaseTerrain.WATER:
         ctx.drawImage(baseTerrainImages[baseTerrain], point.x, point.y);
-        var neighbors = cell.getNeighbors();
 
-        for (var i = 0; i < 6; i++) {
-          if (neighbors[i] && neighbors[i].layers['b'] == BaseTerrain.GRASS) {
-            ctx.drawImage(transitionImages[i], point.x, point.y);
-          }
-        } // for i
+        if (showTransition) {
+          var neighbors = cell.getNeighbors();
+          for (var i = 0; i < 6; i++) {
+            if (neighbors[i] && neighbors[i].layers['b'] == BaseTerrain.GRASS) {
+              ctx.drawImage(transitionImages[i], point.x, point.y);
+            }
+          } // for i
+        }
 
         break;
     } // switch baseTerrain
 
-    ctx.drawImage(baseTerrainImages[BaseTerrain.GRID], point.x, point.y);
+    if (showGrid) {
+      ctx.drawImage(baseTerrainImages[BaseTerrain.GRID], point.x, point.y);
+    }
   } // drawTile
 } // Game

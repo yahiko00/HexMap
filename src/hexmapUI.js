@@ -25,20 +25,53 @@ window.onload = function () {
         'pointy-top/terrain/green-medium-nw.png',
     ]);
     // Listeners
-    $("#flatTopped").on("change", changeOrientation);
-    $("#pointyTopped").on("change", changeOrientation);
+    $('#flatTopped').on('change', changeOrientation);
+    $('#pointyTopped').on('change', changeOrientation);
+    $('#oddOffset').on('change', changeLayoutOffset);
+    $('#evenOffset').on('change', changeLayoutOffset);
+    $('#yesGrid').on('change', changeShowGrid);
+    $('#noGrid').on('change', changeShowGrid);
+    $('#yesTransition').on('change', changeShowTransition);
+    $('#noTransition').on('change', changeShowTransition);
     $('#generate').on('click', generate);
 };
 function changeOrientation() {
-    var flatRadioHTML = document.getElementById("flatTopped");
-    var pointyRadioHTML = document.getElementById("pointyTopped");
+    var flatRadioHTML = document.getElementById('flatTopped');
+    var pointyRadioHTML = document.getElementById('pointyTopped');
     if (flatRadioHTML.checked)
         Hexagon.flatTopped = true;
     else if (pointyRadioHTML.checked)
         Hexagon.flatTopped = false;
-    generate();
+    Game.generate();
 } // changeOrientation
-function generate() {
+function changeLayoutOffset() {
+    var oddRadioHTML = document.getElementById('oddOffset');
+    var evenRadioHTML = document.getElementById('evenOffset');
+    if (oddRadioHTML.checked)
+        Hexagon.evenOffset = false;
+    else if (evenRadioHTML.checked)
+        Hexagon.evenOffset = true;
+    Game.generate();
+} // changeLayoutOffset
+function changeShowGrid() {
+    var yesRadioHTML = document.getElementById('yesGrid');
+    var noRadioHTML = document.getElementById('noGrid');
+    if (yesRadioHTML.checked)
+        Game.showGrid = true;
+    else if (noRadioHTML.checked)
+        Game.showGrid = false;
     Game.refresh();
+} // changeshowGrid
+function changeShowTransition() {
+    var yesRadioHTML = document.getElementById('yesTransition');
+    var noRadioHTML = document.getElementById('noTransition');
+    if (yesRadioHTML.checked)
+        Game.showTransition = true;
+    else if (noRadioHTML.checked)
+        Game.showTransition = false;
+    Game.refresh();
+} // changeShowTransition
+function generate() {
+    Game.generate();
 } // generate
 //# sourceMappingURL=hexmapUI.js.map

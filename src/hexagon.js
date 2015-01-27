@@ -10,41 +10,42 @@ var Hexagon;
     })(Hexagon.Layout || (Hexagon.Layout = {}));
     var Layout = Hexagon.Layout;
     ;
-    (function (DirectionR) {
-        DirectionR[DirectionR["NE"] = 0] = "NE";
-        DirectionR[DirectionR["E"] = 1] = "E";
-        DirectionR[DirectionR["SE"] = 2] = "SE";
-        DirectionR[DirectionR["SW"] = 3] = "SW";
-        DirectionR[DirectionR["W"] = 4] = "W";
-        DirectionR[DirectionR["NW"] = 5] = "NW";
-    })(Hexagon.DirectionR || (Hexagon.DirectionR = {}));
-    var DirectionR = Hexagon.DirectionR;
+    (function (DirectionFlat) {
+        DirectionFlat[DirectionFlat["N"] = 0] = "N";
+        DirectionFlat[DirectionFlat["NE"] = 1] = "NE";
+        DirectionFlat[DirectionFlat["SE"] = 2] = "SE";
+        DirectionFlat[DirectionFlat["S"] = 3] = "S";
+        DirectionFlat[DirectionFlat["SW"] = 4] = "SW";
+        DirectionFlat[DirectionFlat["NW"] = 5] = "NW";
+    })(Hexagon.DirectionFlat || (Hexagon.DirectionFlat = {}));
+    var DirectionFlat = Hexagon.DirectionFlat;
     ;
-    (function (DirectionQ) {
-        DirectionQ[DirectionQ["N"] = 0] = "N";
-        DirectionQ[DirectionQ["NE"] = 1] = "NE";
-        DirectionQ[DirectionQ["SE"] = 2] = "SE";
-        DirectionQ[DirectionQ["S"] = 3] = "S";
-        DirectionQ[DirectionQ["SW"] = 4] = "SW";
-        DirectionQ[DirectionQ["NW"] = 5] = "NW";
-    })(Hexagon.DirectionQ || (Hexagon.DirectionQ = {}));
-    var DirectionQ = Hexagon.DirectionQ;
+    (function (DirectionPointy) {
+        DirectionPointy[DirectionPointy["NE"] = 0] = "NE";
+        DirectionPointy[DirectionPointy["E"] = 1] = "E";
+        DirectionPointy[DirectionPointy["SE"] = 2] = "SE";
+        DirectionPointy[DirectionPointy["SW"] = 3] = "SW";
+        DirectionPointy[DirectionPointy["W"] = 4] = "W";
+        DirectionPointy[DirectionPointy["NW"] = 5] = "NW";
+    })(Hexagon.DirectionPointy || (Hexagon.DirectionPointy = {}));
+    var DirectionPointy = Hexagon.DirectionPointy;
     ;
-    var movesR = [
-        [+1, -1, 0],
-        [+1, 0, -1],
-        [0, +1, -1],
-        [-1, +1, 0],
-        [-1, 0, +1],
-        [0, -1, +1]
-    ];
-    var movesQ = [
+    // Move vectors for each direction
+    var movesFlat = [
         [0, +1, -1],
         [+1, 0, -1],
         [+1, -1, 0],
         [0, -1, +1],
         [-1, 0, +1],
         [-1, +1, 0]
+    ];
+    var movesPointy = [
+        [+1, 0, -1],
+        [+1, -1, 0],
+        [0, -1, +1],
+        [-1, 0, +1],
+        [-1, +1, 0],
+        [0, +1, -1]
     ];
     Hexagon.mapWidth; // map width in cells
     Hexagon.mapHeight; // map height in cells
@@ -71,6 +72,8 @@ var Hexagon;
     })();
     Hexagon.LayerTypeEnum = LayerTypeEnum; // LayerTypeEnum
     function init(mapWidth, mapHeight, cellWidth, cellHeight, flatTopped, evenOffset) {
+        if (flatTopped === void 0) { flatTopped = true; }
+        if (evenOffset === void 0) { evenOffset = true; }
         Hexagon.mapWidth = mapWidth;
         Hexagon.mapHeight = mapHeight;
         Hexagon.flatTopped = flatTopped;
@@ -145,10 +148,10 @@ var Hexagon;
             var moves;
             var neighbors = [];
             if (Hexagon.flatTopped) {
-                moves = movesQ;
+                moves = movesFlat;
             }
             else {
-                moves = movesR;
+                moves = movesPointy;
             }
             for (var i = 0; i < 6; i++) {
                 var move = moves[i];

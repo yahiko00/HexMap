@@ -1,10 +1,9 @@
 /// <reference path='hexagon.ts' />
-var _this = this;
 /**
  * cf. http://codeincomplete.com/posts/2013/12/3/javascript_game_foundations_loading_assets/
  */
-function loadImages(filenames, callback) {
-    var images = {};
+function loadImages(folder, filenames, callback) {
+    var images = [];
     var count = filenames.length;
     if (callback) {
         var onload = function () {
@@ -14,24 +13,60 @@ function loadImages(filenames, callback) {
     }
     for (var i = 0; i < filenames.length; i++) {
         var filename = filenames[i];
-        images[filename] = document.createElement('img');
-        images[filename].addEventListener('load', onload);
-        images[filename].src = "../data/images/" + filename;
+        images[i] = document.createElement('img');
+        images[i].addEventListener('load', onload);
+        images[i].src = folder + filename;
     }
 } // loadImages
 var Game;
 (function (Game) {
+    var BaseTerrain;
+    (function (BaseTerrain) {
+        BaseTerrain[BaseTerrain["GRASS"] = 0] = "GRASS";
+        BaseTerrain[BaseTerrain["WATER"] = 1] = "WATER";
+        BaseTerrain[BaseTerrain["GRID"] = 2] = "GRID";
+    })(BaseTerrain || (BaseTerrain = {}));
+    ;
     Game.container;
-    Game.images;
     var canvas;
     var ctx;
-    function main(container, images) {
+    Game.folder;
+    Game.baseTerrainFlatFilenames; // must be stored in reversed order of precedence, index 0 is the highest precedence.
+    Game.transitionFlatFilenames;
+    Game.baseTerrainPointyFilenames; // must be stored in reversed order of precedence, index 0 is the highest precedence.
+    Game.transitionPointyFilenames;
+    Game.baseTerrainFlatImages;
+    Game.transitionFlatImages;
+    Game.baseTerrainPointyImages;
+    Game.transitionPointyImages;
+    function init(container, folder, baseTerrainFlatFilenames, transitionFlatFilenames, baseTerrainPointyFilenames, transitionPointyFilenames) {
+        var _this = this;
         Game.container = container;
-        Game.images = images;
-        Hexagon.init(10, 8, 72, 72, true, true);
+        Game.folder = folder;
+        Game.baseTerrainFlatFilenames = baseTerrainFlatFilenames;
+        Game.transitionFlatFilenames = transitionFlatFilenames;
+        Game.baseTerrainPointyFilenames = baseTerrainPointyFilenames;
+        Game.transitionPointyFilenames = transitionPointyFilenames;
+        loadImages(folder, baseTerrainFlatFilenames, function (images) {
+            Game.baseTerrainFlatImages = images;
+            loadImages(folder, transitionFlatFilenames, function (images) {
+                Game.transitionFlatImages = images;
+                loadImages(folder, baseTerrainPointyFilenames, function (images) {
+                    Game.baseTerrainPointyImages = images;
+                    loadImages(folder, transitionPointyFilenames, function (images) {
+                        Game.transitionPointyImages = images;
+                        main.call(_this);
+                    });
+                });
+            });
+        });
+    }
+    Game.init = init; // init
+    function main() {
+        Hexagon.init(10, 8, 72, 72, true, true); // Flat-topped hexagons, even-q layout
         canvas = document.createElement('canvas');
-        container.appendChild(canvas);
-        canvas.width = 600;
+        Game.container.appendChild(canvas);
+        canvas.width = 800;
         canvas.height = 600;
         ctx = canvas.getContext('2d');
         drawMap();
@@ -45,50 +80,58 @@ var Game;
         }
     } // drawMap
     function drawTile(q, r) {
+        // we assume (q, r) are valid cell coordinates
         var cell = Hexagon.map[q][r];
         var point = cell.toPoint();
-        switch (cell.layers[Hexagon.LayerTypeEnum.base]) {
-            case 0:
-                ctx.drawImage(Game.images['flat-top/terrain/ocean-A01.png'], point.x, point.y);
-                var neighbors = cell.getNeighbors();
-                if (neighbors[0 /* N */] && neighbors[0 /* N */].layers['b'] == 1) {
-                    ctx.drawImage(Game.images['flat-top/terrain/green-medium-n.png'], point.x, point.y);
-                }
-                if (neighbors[1 /* NE */] && neighbors[1 /* NE */].layers['b'] == 1) {
-                    ctx.drawImage(Game.images['flat-top/terrain/green-medium-ne.png'], point.x, point.y);
-                }
-                if (neighbors[2 /* SE */] && neighbors[2 /* SE */].layers['b'] == 1) {
-                    ctx.drawImage(Game.images['flat-top/terrain/green-medium-se.png'], point.x, point.y);
-                }
-                if (neighbors[3 /* S */] && neighbors[3 /* S */].layers['b'] == 1) {
-                    ctx.drawImage(Game.images['flat-top/terrain/green-medium-s.png'], point.x, point.y);
-                }
-                if (neighbors[4 /* SW */] && neighbors[4 /* SW */].layers['b'] == 1) {
-                    ctx.drawImage(Game.images['flat-top/terrain/green-medium-sw.png'], point.x, point.y);
-                }
-                if (neighbors[5 /* NW */] && neighbors[5 /* NW */].layers['b'] == 1) {
-                    ctx.drawImage(Game.images['flat-top/terrain/green-medium-nw.png'], point.x, point.y);
-                }
+        var baseTerrain = cell.layers[Hexagon.LayerTypeEnum.base];
+        if (Hexagon.flatTopped) {
+            var baseTerrainImages = Game.baseTerrainFlatImages;
+            var transitionImages = Game.transitionFlatImages;
+        }
+        else {
+            var baseTerrainImages = Game.baseTerrainPointyImages;
+            var transitionImages = Game.transitionPointyImages;
+        }
+        switch (baseTerrain) {
+            case 0 /* GRASS */:
+                ctx.drawImage(baseTerrainImages[baseTerrain], point.x, point.y);
                 break;
-            case 1:
-                ctx.drawImage(Game.images['flat-top/terrain/green.png'], point.x, point.y);
+            case 1 /* WATER */:
+                ctx.drawImage(baseTerrainImages[baseTerrain], point.x, point.y);
+                var neighbors = cell.getNeighbors();
+                for (var i = 0; i < 6; i++) {
+                    if (neighbors[i] && neighbors[i].layers['b'] == 0 /* GRASS */) {
+                        ctx.drawImage(transitionImages[i], point.x, point.y);
+                    }
+                }
                 break;
         }
-        ctx.drawImage(Game.images['flat-top/terrain/grid.png'], point.x, point.y);
+        ctx.drawImage(baseTerrainImages[2 /* GRID */], point.x, point.y);
     } // drawTile
 })(Game || (Game = {})); // Game
 window.onload = function () {
-    var container = document.getElementById('content');
-    loadImages([
+    Game.init(document.getElementById('content'), '../data/images/', [
         'flat-top/terrain/green.png',
+        'flat-top/terrain/ocean-A01.png',
+        'flat-top/terrain/grid.png',
+    ], [
         'flat-top/terrain/green-medium-n.png',
         'flat-top/terrain/green-medium-ne.png',
         'flat-top/terrain/green-medium-se.png',
         'flat-top/terrain/green-medium-s.png',
         'flat-top/terrain/green-medium-sw.png',
         'flat-top/terrain/green-medium-nw.png',
-        'flat-top/terrain/ocean-A01.png',
-        'flat-top/terrain/grid.png'
-    ], Game.main.bind(_this, container));
+    ], [
+        'pointy-top/terrain/green.png',
+        'pointy-top/terrain/ocean-A01.png',
+        'pointy-top/terrain/grid.png',
+    ], [
+        'pointy-top/terrain/green-medium-ne.png',
+        'pointy-top/terrain/green-medium-e.png',
+        'pointy-top/terrain/green-medium-se.png',
+        'pointy-top/terrain/green-medium-sw.png',
+        'pointy-top/terrain/green-medium-w.png',
+        'pointy-top/terrain/green-medium-nw.png',
+    ]);
 };
 //# sourceMappingURL=hexmap.js.map

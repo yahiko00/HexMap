@@ -4,15 +4,16 @@
 
   export enum Layout { ODD_R, EVEN_R, ODD_Q, EVEN_Q };
   export type Point = { x: number; y: number };
-  export enum DirectionR { NE, E, SE, SW, W, NW };
-  export enum DirectionQ { N, NE, SE, S, SW, NW };
-  var movesR = [
-    [+1, -1, 0], [+1, 0, -1], [0, +1, -1],
-    [-1, +1, 0], [-1, 0, +1], [0, -1, +1]
-  ];
-  var movesQ = [
+  export enum DirectionFlat { N, NE, SE, S, SW, NW }; // Directions for flat topped hexagons
+  export enum DirectionPointy { NE, E, SE, SW, W, NW }; // Directions for pointy topped hexagons
+  // Move vectors for each direction
+  var movesFlat = [
     [0, +1, -1], [+1, 0, -1], [+1, -1, 0],
     [0, -1, +1], [-1, 0, +1], [-1, +1, 0]
+  ];
+  var movesPointy = [
+    [+1, 0, -1], [+1, -1, 0], [0, -1, +1],
+    [-1, 0, +1], [-1, +1, 0], [0, +1, -1]
   ];
 
   export var mapWidth: number; // map width in cells
@@ -33,7 +34,7 @@
     static unit = 'u';
   } // LayerTypeEnum
 
-  export function init(mapWidth, mapHeight, cellWidth, cellHeight: number, flatTopped, evenOffset: boolean) {
+  export function init(mapWidth, mapHeight, cellWidth, cellHeight: number, flatTopped = true, evenOffset = true) {
     Hexagon.mapWidth = mapWidth;
     Hexagon.mapHeight = mapHeight;
     Hexagon.flatTopped = flatTopped;
@@ -125,10 +126,10 @@
       var neighbors: Cell[] = [];
 
       if (flatTopped) {
-        moves = movesQ;
+        moves = movesFlat;
       }
       else {
-        moves = movesR;
+        moves = movesPointy;
       }
 
       for (var i = 0; i < 6; i++) {

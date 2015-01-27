@@ -80,17 +80,21 @@ var Hexagon;
         Hexagon.evenOffset = evenOffset;
         Hexagon.cellWidth = cellWidth;
         Hexagon.cellHeight = cellHeight;
-        Hexagon.mapLayout = (evenOffset ? 1 : 0) | (flatTopped ? 1 : 0) << 1;
-        Hexagon.map = new Array(mapWidth);
-        for (var i = 0; i < mapWidth; i++) {
-            Hexagon.map[i] = new Array(mapHeight);
-            for (var j = 0; j < mapHeight; j++) {
+    }
+    Hexagon.init = init; // init
+    function generate() {
+        Hexagon.mapLayout = (Hexagon.evenOffset ? 1 : 0) | (Hexagon.flatTopped ? 1 : 0) << 1;
+        Hexagon.map = [];
+        Hexagon.map = new Array(Hexagon.mapWidth);
+        for (var i = 0; i < Hexagon.mapWidth; i++) {
+            Hexagon.map[i] = new Array(Hexagon.mapHeight);
+            for (var j = 0; j < Hexagon.mapHeight; j++) {
                 Hexagon.map[i][j] = new Cell(i, j);
                 Hexagon.map[i][j].layers[LayerTypeEnum.base] = Math.round(Math.random());
             }
         }
     }
-    Hexagon.init = init; // init
+    Hexagon.generate = generate; // generate
     /**
       * Hexagonal cell expressed in offset coordinates
       */

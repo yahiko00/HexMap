@@ -41,9 +41,12 @@
     Hexagon.evenOffset = evenOffset;
     Hexagon.cellWidth = cellWidth;
     Hexagon.cellHeight = cellHeight;
+  } // init
 
+  export function generate() {
     mapLayout = (evenOffset ? 1 : 0) | (flatTopped ? 1 : 0) << 1;
 
+    map = [];
     map = new Array(mapWidth);
     for (var i = 0; i < mapWidth; i++) {
       map[i] = new Array(mapHeight);
@@ -53,7 +56,7 @@
         map[i][j].layers[LayerTypeEnum.base] = Math.round(Math.random());
       } // for j
     } // for i
-  } // init
+  } // generate
 
   /**
     * Hexagonal cell expressed in offset coordinates

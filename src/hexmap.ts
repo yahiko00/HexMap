@@ -47,22 +47,6 @@ module Game {
     Game.baseTerrainPointyFilenames = baseTerrainPointyFilenames;
     Game.transitionPointyFilenames = transitionPointyFilenames;
 
-    loadImages(folder, baseTerrainFlatFilenames, (images: HTMLImageElement[]) => {
-      baseTerrainFlatImages = images;
-      loadImages(folder, transitionFlatFilenames, (images: HTMLImageElement[]) => {
-        transitionFlatImages = images;
-        loadImages(folder, baseTerrainPointyFilenames, (images: HTMLImageElement[]) => {
-          baseTerrainPointyImages = images;
-          loadImages(folder, transitionPointyFilenames, (images: HTMLImageElement[]) => {
-            transitionPointyImages = images;
-            main.call(this);
-          });
-        });
-      });
-    });
-  } // init
-
-  export function main() {
     Hexagon.init(10, 8, 72, 72, true, true); // Flat-topped hexagons, even-q layout
 
     canvas = document.createElement('canvas');
@@ -71,8 +55,26 @@ module Game {
     canvas.height = 600;
     ctx = canvas.getContext('2d');
 
+    loadImages(folder, baseTerrainFlatFilenames, (images: HTMLImageElement[]) => {
+      baseTerrainFlatImages = images;
+      loadImages(folder, transitionFlatFilenames, (images: HTMLImageElement[]) => {
+        transitionFlatImages = images;
+        loadImages(folder, baseTerrainPointyFilenames, (images: HTMLImageElement[]) => {
+          baseTerrainPointyImages = images;
+          loadImages(folder, transitionPointyFilenames, (images: HTMLImageElement[]) => {
+            transitionPointyImages = images;
+            refresh.call(this);
+          });
+        });
+      });
+    });
+  } // init
+
+  export function refresh() {
+    Hexagon.generate();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawMap();
-  } // main
+  } // refresh;
 
   function drawMap() {
     for (var i = 0; i < Hexagon.mapWidth; i++) {
@@ -117,35 +119,3 @@ module Game {
     ctx.drawImage(baseTerrainImages[BaseTerrain.GRID], point.x, point.y);
   } // drawTile
 } // Game
-
-window.onload = () => {
-  Game.init(
-    document.getElementById('content'),
-    '../data/images/',
-    [
-      'flat-top/terrain/green.png',
-      'flat-top/terrain/ocean-A01.png',
-      'flat-top/terrain/grid.png',
-    ],
-    [
-      'flat-top/terrain/green-medium-n.png',
-      'flat-top/terrain/green-medium-ne.png',
-      'flat-top/terrain/green-medium-se.png',
-      'flat-top/terrain/green-medium-s.png',
-      'flat-top/terrain/green-medium-sw.png',
-      'flat-top/terrain/green-medium-nw.png',
-    ],
-    [
-      'pointy-top/terrain/green.png',
-      'pointy-top/terrain/ocean-A01.png',
-      'pointy-top/terrain/grid.png',
-    ],
-    [
-      'pointy-top/terrain/green-medium-ne.png',
-      'pointy-top/terrain/green-medium-e.png',
-      'pointy-top/terrain/green-medium-se.png',
-      'pointy-top/terrain/green-medium-sw.png',
-      'pointy-top/terrain/green-medium-w.png',
-      'pointy-top/terrain/green-medium-nw.png',
-    ]);
-};

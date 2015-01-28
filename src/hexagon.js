@@ -160,6 +160,13 @@ var Hexagon;
             }
             return neighbors;
         }; // getNeighbors
+        Cell.prototype.getCenter = function () {
+            var upperLeft = this.toPoint();
+            return {
+                x: Math.round(upperLeft.x + Hexagon.cellWidth / 2),
+                y: Math.round(upperLeft.y + Hexagon.cellHeight / 2),
+            };
+        }; // getCenter
         return Cell;
     })();
     Hexagon.Cell = Cell; // Cell

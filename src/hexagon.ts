@@ -137,6 +137,14 @@
 
       return neighbors;
     } // getNeighbors
+
+    getCenter(): Point {
+      var upperLeft = this.toPoint();
+      return {
+        x: Math.round(upperLeft.x + cellWidth / 2),
+        y: Math.round(upperLeft.y + cellHeight / 2),
+      }
+    } // getCenter
   } // Cell
 
   /**

@@ -18,7 +18,6 @@
 
   export var mapWidth: number; // map width in cells
   export var mapHeight: number; // map height in cells
-  export var mapLayout: Layout;
   export var map: Cell[][];
   export var cellWidth: number; // cell width in pixels
   export var cellHeight: number; // cell height in pixels
@@ -35,28 +34,17 @@
   } // LayerTypeEnum
 
   export function init(mapWidth, mapHeight, cellWidth, cellHeight: number, flatTopped = true, evenOffset = true) {
-    Hexagon.mapWidth = mapWidth;
-    Hexagon.mapHeight = mapHeight;
-    Hexagon.flatTopped = flatTopped;
-    Hexagon.evenOffset = evenOffset;
-    Hexagon.cellWidth = cellWidth;
-    Hexagon.cellHeight = cellHeight;
+    this.mapWidth = mapWidth;
+    this.mapHeight = mapHeight;
+    this.flatTopped = flatTopped;
+    this.evenOffset = evenOffset;
+    this.cellWidth = cellWidth;
+    this.cellHeight = cellHeight;
   } // init
 
-  export function generate() {
-    mapLayout = (evenOffset ? 1 : 0) | (flatTopped ? 1 : 0) << 1;
-
-    map = [];
-    map = new Array(mapWidth);
-    for (var i = 0; i < mapWidth; i++) {
-      map[i] = new Array(mapHeight);
-
-      for (var j = 0; j < mapHeight; j++) {
-        map[i][j] = new Cell(i, j);
-        map[i][j].layers[LayerTypeEnum.base] = Math.round(Math.random());
-      } // for j
-    } // for i
-  } // generate
+  export function mapLayout() {
+    return (evenOffset ? 1 : 0) | (flatTopped ? 1 : 0) << 1;
+  } // mapLayout
 
   /**
     * Hexagonal cell expressed in offset coordinates
@@ -75,7 +63,7 @@
     private toCube(): Cube {
       var x, y, z: number;
 
-      switch (mapLayout) {
+      switch (mapLayout()) {
         case Layout.ODD_R:
           x = this.q - (this.r - (this.r & 1)) / 2;
           z = this.r;
@@ -175,7 +163,7 @@
     toOffset() {
       var q, r: number;
 
-      switch (mapLayout) {
+      switch (mapLayout()) {
         case Layout.ODD_R:
           q = this.x + (this.z - (this.z & 1)) / 2;
           r = this.z;

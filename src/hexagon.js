@@ -49,7 +49,6 @@ var Hexagon;
     ];
     Hexagon.mapWidth; // map width in cells
     Hexagon.mapHeight; // map height in cells
-    Hexagon.mapLayout;
     Hexagon.map;
     Hexagon.cellWidth; // cell width in pixels
     Hexagon.cellHeight; // cell height in pixels
@@ -74,27 +73,18 @@ var Hexagon;
     function init(mapWidth, mapHeight, cellWidth, cellHeight, flatTopped, evenOffset) {
         if (flatTopped === void 0) { flatTopped = true; }
         if (evenOffset === void 0) { evenOffset = true; }
-        Hexagon.mapWidth = mapWidth;
-        Hexagon.mapHeight = mapHeight;
-        Hexagon.flatTopped = flatTopped;
-        Hexagon.evenOffset = evenOffset;
-        Hexagon.cellWidth = cellWidth;
-        Hexagon.cellHeight = cellHeight;
+        this.mapWidth = mapWidth;
+        this.mapHeight = mapHeight;
+        this.flatTopped = flatTopped;
+        this.evenOffset = evenOffset;
+        this.cellWidth = cellWidth;
+        this.cellHeight = cellHeight;
     }
     Hexagon.init = init; // init
-    function generate() {
-        Hexagon.mapLayout = (Hexagon.evenOffset ? 1 : 0) | (Hexagon.flatTopped ? 1 : 0) << 1;
-        Hexagon.map = [];
-        Hexagon.map = new Array(Hexagon.mapWidth);
-        for (var i = 0; i < Hexagon.mapWidth; i++) {
-            Hexagon.map[i] = new Array(Hexagon.mapHeight);
-            for (var j = 0; j < Hexagon.mapHeight; j++) {
-                Hexagon.map[i][j] = new Cell(i, j);
-                Hexagon.map[i][j].layers[LayerTypeEnum.base] = Math.round(Math.random());
-            }
-        }
+    function mapLayout() {
+        return (Hexagon.evenOffset ? 1 : 0) | (Hexagon.flatTopped ? 1 : 0) << 1;
     }
-    Hexagon.generate = generate; // generate
+    Hexagon.mapLayout = mapLayout; // mapLayout
     /**
       * Hexagonal cell expressed in offset coordinates
       */
@@ -106,7 +96,7 @@ var Hexagon;
         } // constructor
         Cell.prototype.toCube = function () {
             var x, y, z;
-            switch (Hexagon.mapLayout) {
+            switch (mapLayout()) {
                 case 0 /* ODD_R */:
                     x = this.q - (this.r - (this.r & 1)) / 2;
                     z = this.r;
@@ -189,7 +179,7 @@ var Hexagon;
         }; // toAxial
         Cube.prototype.toOffset = function () {
             var q, r;
-            switch (Hexagon.mapLayout) {
+            switch (mapLayout()) {
                 case 0 /* ODD_R */:
                     q = this.x + (this.z - (this.z & 1)) / 2;
                     r = this.z;

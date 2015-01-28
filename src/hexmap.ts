@@ -21,8 +21,9 @@ function loadImages(folder: string, filenames: string[], callback?) {
   } // for i
 } // loadImages
 
-module Game {
-  enum BaseTerrain { GRASS, WATER, GRID };
+module Hexmap {
+  enum BaseTerrain { HILL, GRASS, WATER };
+  enum Grid { DEFAULT };
 
   export var container: HTMLElement;
   var canvas: HTMLCanvasElement;
@@ -31,26 +32,32 @@ module Game {
   export var folder: string;
   export var baseTerrainFlatFilenames: string[]; // must be stored in reversed order of precedence, index 0 is the highest precedence.
   export var transitionFlatFilenames: string[];
+  export var gridFlatFilenames: string[];
   export var baseTerrainPointyFilenames: string[]; // must be stored in reversed order of precedence, index 0 is the highest precedence.
   export var transitionPointyFilenames: string[];
+  export var gridPointyFilenames: string[];
 
   export var baseTerrainFlatImages: HTMLImageElement[];
   export var transitionFlatImages: HTMLImageElement[];
+  export var gridFlatImages: HTMLImageElement[];
   export var baseTerrainPointyImages: HTMLImageElement[];
   export var transitionPointyImages: HTMLImageElement[];
+  export var gridPointyImages: HTMLImageElement[];
 
   export var showGrid: boolean;
   export var showTransition: boolean;
 
-  export function init(container: HTMLElement, folder: string, baseTerrainFlatFilenames, transitionFlatFilenames, baseTerrainPointyFilenames, transitionPointyFilenames: string[]) {
-    Game.showGrid = true;
-    Game.showTransition = true;
-    Game.folder = folder;
-    Game.baseTerrainFlatFilenames = baseTerrainFlatFilenames;
-    Game.transitionFlatFilenames = transitionFlatFilenames;
-    Game.baseTerrainPointyFilenames = baseTerrainPointyFilenames;
-    Game.transitionPointyFilenames = transitionPointyFilenames;
-    Game.container = container;
+  export function init(container: HTMLElement, folder: string,
+    baseTerrainFlatFilenames, transitionFlatFilenames, gridFlatFilenames,
+    baseTerrainPointyFilenames, transitionPointyFilenames, gridPointyFilenames: string[]) {
+    this.showGrid = true;
+    this.showTransition = true;
+    this.folder = folder;
+    this.baseTerrainFlatFilenames = baseTerrainFlatFilenames;
+    this.transitionFlatFilenames = transitionFlatFilenames;
+    this.baseTerrainPointyFilenames = baseTerrainPointyFilenames;
+    this.transitionPointyFilenames = transitionPointyFilenames;
+    this.container = container;
 
     Hexagon.init(10, 8, 72, 72, true, true); // Flat-topped hexagons, even-q layout
 
@@ -64,11 +71,17 @@ module Game {
       baseTerrainFlatImages = images;
       loadImages(folder, transitionFlatFilenames, (images: HTMLImageElement[]) => {
         transitionFlatImages = images;
-        loadImages(folder, baseTerrainPointyFilenames, (images: HTMLImageElement[]) => {
-          baseTerrainPointyImages = images;
-          loadImages(folder, transitionPointyFilenames, (images: HTMLImageElement[]) => {
-            transitionPointyImages = images;
-            generate.call(this);
+        loadImages(folder, gridFlatFilenames, (images: HTMLImageElement[]) => {
+          gridFlatImages = images;
+          loadImages(folder, baseTerrainPointyFilenames, (images: HTMLImageElement[]) => {
+            baseTerrainPointyImages = images;
+            loadImages(folder, transitionPointyFilenames, (images: HTMLImageElement[]) => {
+              transitionPointyImages = images;
+              loadImages(folder, gridPointyFilenames, (images: HTMLImageElement[]) => {
+                gridPointyImages = images;
+                generate.call(this);
+              });
+            });
           });
         });
       });
@@ -76,8 +89,20 @@ module Game {
   } // init
 
   export function generate() {
-    Hexagon.generate();
-    refresh();
+    var nbBaseTerrain = Object.keys(BaseTerrain).length / 2;
+
+    Hexagon.map = [];
+    Hexagon.map = new Array(Hexagon.mapWidth);
+    for (var i = 0; i < Hexagon.mapWidth; i++) {
+      Hexagon.map[i] = new Array(Hexagon.mapHeight);
+
+      for (var j = 0; j < Hexagon.mapHeight; j++) {
+        Hexagon.map[i][j] = new Hexagon.Cell(i, j);
+        Hexagon.map[i][j].layers[Hexagon.LayerTypeEnum.base] = Math.floor(Math.random() * nbBaseTerrain);
+      } // for j
+    } // for i
+
+  refresh();
   } // generate;
 
   export function refresh() {
@@ -102,15 +127,30 @@ module Game {
     if (Hexagon.flatTopped) {
       var baseTerrainImages = baseTerrainFlatImages;
       var transitionImages = transitionFlatImages;
+      var gridImages = gridFlatImages;
     }
     else {
       var baseTerrainImages = baseTerrainPointyImages;
       var transitionImages = transitionPointyImages;
+      var gridImages = gridPointyImages;
     }
 
     switch (baseTerrain) {
+      case BaseTerrain.HILL:
+        ctx.drawImage(baseTerrainImages[baseTerrain], point.x, point.y);
+        break;
       case BaseTerrain.GRASS:
         ctx.drawImage(baseTerrainImages[baseTerrain], point.x, point.y);
+
+        if (showTransition) {
+          var neighbors = cell.getNeighbors();
+          for (var i = 0; i < 6; i++) {
+            if (neighbors[i] && neighbors[i].layers['b'] == BaseTerrain.HILL) {
+              ctx.drawImage(transitionImages[i], point.x, point.y);
+            }
+          } // for i
+        }
+
         break;
       case BaseTerrain.WATER:
         ctx.drawImage(baseTerrainImages[baseTerrain], point.x, point.y);
@@ -118,8 +158,11 @@ module Game {
         if (showTransition) {
           var neighbors = cell.getNeighbors();
           for (var i = 0; i < 6; i++) {
-            if (neighbors[i] && neighbors[i].layers['b'] == BaseTerrain.GRASS) {
+            if (neighbors[i] && neighbors[i].layers['b'] == BaseTerrain.HILL) {
               ctx.drawImage(transitionImages[i], point.x, point.y);
+            }
+            else if (neighbors[i] && neighbors[i].layers['b'] == BaseTerrain.GRASS) {
+              ctx.drawImage(transitionImages[i + 6], point.x, point.y);
             }
           } // for i
         }
@@ -128,7 +171,7 @@ module Game {
     } // switch baseTerrain
 
     if (showGrid) {
-      ctx.drawImage(baseTerrainImages[BaseTerrain.GRID], point.x, point.y);
+      ctx.drawImage(gridImages[Grid.DEFAULT], point.x, point.y);
     }
   } // drawTile
-} // Game
+} // Hexmap

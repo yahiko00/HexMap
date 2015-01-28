@@ -130,37 +130,45 @@ var Hexmap;
         }
         switch (baseTerrain) {
             case 0 /* HILL */:
-                ctx.drawImage(baseTerrainImages[baseTerrain], point.x, point.y);
+                drawImage(baseTerrainImages[baseTerrain], cell);
                 break;
             case 1 /* GRASS */:
-                ctx.drawImage(baseTerrainImages[baseTerrain], point.x, point.y);
+                drawImage(baseTerrainImages[baseTerrain], cell);
                 if (Hexmap.showTransition) {
                     var neighbors = cell.getNeighbors();
                     for (var i = 0; i < 6; i++) {
                         if (neighbors[i] && neighbors[i].layers['b'] == 0 /* HILL */) {
-                            ctx.drawImage(transitionImages[i], point.x, point.y);
+                            drawImage(transitionImages[i], cell);
                         }
                     }
                 }
                 break;
             case 2 /* WATER */:
-                ctx.drawImage(baseTerrainImages[baseTerrain], point.x, point.y);
+                drawImage(baseTerrainImages[baseTerrain], cell);
                 if (Hexmap.showTransition) {
                     var neighbors = cell.getNeighbors();
                     for (var i = 0; i < 6; i++) {
                         if (neighbors[i] && neighbors[i].layers['b'] == 0 /* HILL */) {
-                            ctx.drawImage(transitionImages[i], point.x, point.y);
+                            drawImage(transitionImages[i], cell);
                         }
                         else if (neighbors[i] && neighbors[i].layers['b'] == 1 /* GRASS */) {
-                            ctx.drawImage(transitionImages[i + 6], point.x, point.y);
+                            drawImage(transitionImages[i + 6], cell);
                         }
                     }
                 }
                 break;
         }
         if (Hexmap.showGrid) {
-            ctx.drawImage(gridImages[0 /* DEFAULT */], point.x, point.y);
+            drawImage(gridImages[0 /* DEFAULT */], cell);
         }
     } // drawTile
+    function drawImage(image, cell) {
+        var imgCenter = {
+            x: Math.floor(image.width / 2),
+            y: Math.floor(image.height / 2)
+        };
+        var tileCenter = cell.getCenter();
+        ctx.drawImage(image, tileCenter.x - imgCenter.x, tileCenter.y - imgCenter.y);
+    } // drawImage
 })(Hexmap || (Hexmap = {})); // Hexmap
 //# sourceMappingURL=hexmap.js.map

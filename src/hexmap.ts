@@ -137,32 +137,32 @@ module Hexmap {
 
     switch (baseTerrain) {
       case BaseTerrain.HILL:
-        ctx.drawImage(baseTerrainImages[baseTerrain], point.x, point.y);
+        drawImage(baseTerrainImages[baseTerrain], cell);
         break;
       case BaseTerrain.GRASS:
-        ctx.drawImage(baseTerrainImages[baseTerrain], point.x, point.y);
+        drawImage(baseTerrainImages[baseTerrain], cell);
 
         if (showTransition) {
           var neighbors = cell.getNeighbors();
           for (var i = 0; i < 6; i++) {
             if (neighbors[i] && neighbors[i].layers['b'] == BaseTerrain.HILL) {
-              ctx.drawImage(transitionImages[i], point.x, point.y);
+              drawImage(transitionImages[i], cell);
             }
           } // for i
         }
 
         break;
       case BaseTerrain.WATER:
-        ctx.drawImage(baseTerrainImages[baseTerrain], point.x, point.y);
+        drawImage(baseTerrainImages[baseTerrain], cell);
 
         if (showTransition) {
           var neighbors = cell.getNeighbors();
           for (var i = 0; i < 6; i++) {
             if (neighbors[i] && neighbors[i].layers['b'] == BaseTerrain.HILL) {
-              ctx.drawImage(transitionImages[i], point.x, point.y);
+              drawImage(transitionImages[i], cell);
             }
             else if (neighbors[i] && neighbors[i].layers['b'] == BaseTerrain.GRASS) {
-              ctx.drawImage(transitionImages[i + 6], point.x, point.y);
+              drawImage(transitionImages[i + 6], cell);
             }
           } // for i
         }
@@ -171,7 +171,18 @@ module Hexmap {
     } // switch baseTerrain
 
     if (showGrid) {
-      ctx.drawImage(gridImages[Grid.DEFAULT], point.x, point.y);
+      drawImage(gridImages[Grid.DEFAULT], cell);
     }
   } // drawTile
+
+  function drawImage(image: HTMLImageElement, cell: Hexagon.Cell) {
+    var imgCenter = {
+      x: Math.floor(image.width / 2),
+      y: Math.floor(image.height / 2)
+    };
+
+    var tileCenter = cell.getCenter();
+
+    ctx.drawImage(image, tileCenter.x - imgCenter.x, tileCenter.y - imgCenter.y);
+  } // drawImage
 } // Hexmap

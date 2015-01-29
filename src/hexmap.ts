@@ -115,6 +115,11 @@ module Hexmap {
       } // for j
     } // for i
 
+    // trees
+    Hexagon.map[2][2].layers[LayerTypeEnum.fringe] = FringeTerrain.TREE;
+    Hexagon.map[3][2].layers[LayerTypeEnum.fringe] = FringeTerrain.TREE;
+    Hexagon.map[3][3].layers[LayerTypeEnum.fringe] = FringeTerrain.TREE;
+
   refresh();
   } // generate;
 
@@ -136,11 +141,6 @@ module Hexmap {
         drawTile(i, j);
       } // for j
     } // for i
-
-    // display trees
-    drawImage(fringeImages[FringeTerrain.TREE], Hexagon.map[2][2]);
-    drawImage(fringeImages[FringeTerrain.TREE], Hexagon.map[3][2]);
-    drawImage(fringeImages[FringeTerrain.TREE], Hexagon.map[3][3]);
   } // drawMap
 
   function drawTile(q, r: number) {
@@ -148,6 +148,7 @@ module Hexmap {
     var cell = Hexagon.map[q][r];
     var point = cell.toPoint();
     var baseTerrain = cell.layers[LayerTypeEnum.base];
+    var fringeTerrain = cell.layers[LayerTypeEnum.fringe];
 
     if (Hexagon.flatTopped) {
       var baseTerrainImages = baseTerrainFlatImages;
@@ -194,6 +195,12 @@ module Hexmap {
 
         break;
     } // switch baseTerrain
+
+    switch (fringeTerrain) {
+      case FringeTerrain.TREE:
+        drawImage(fringeImages[fringeTerrain], cell);
+        break;
+    } // switch fringeTerrain
 
     if (showGrid) {
       drawImage(gridImages[Grid.DEFAULT], cell);

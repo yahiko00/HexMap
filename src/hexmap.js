@@ -117,6 +117,10 @@ var Hexmap;
                 Hexagon.map[i][j].layers[LayerTypeEnum.base] = Math.floor(Math.random() * nbBaseTerrain);
             }
         }
+        // trees
+        Hexagon.map[2][2].layers[LayerTypeEnum.fringe] = 0 /* TREE */;
+        Hexagon.map[3][2].layers[LayerTypeEnum.fringe] = 0 /* TREE */;
+        Hexagon.map[3][3].layers[LayerTypeEnum.fringe] = 0 /* TREE */;
         refresh();
     }
     Hexmap.generate = generate; // generate;
@@ -136,16 +140,13 @@ var Hexmap;
                 drawTile(i, j);
             }
         }
-        // display trees
-        drawImage(Hexmap.fringeImages[0 /* TREE */], Hexagon.map[2][2]);
-        drawImage(Hexmap.fringeImages[0 /* TREE */], Hexagon.map[3][2]);
-        drawImage(Hexmap.fringeImages[0 /* TREE */], Hexagon.map[3][3]);
     } // drawMap
     function drawTile(q, r) {
         // we assume (q, r) are valid cell coordinates
         var cell = Hexagon.map[q][r];
         var point = cell.toPoint();
         var baseTerrain = cell.layers[LayerTypeEnum.base];
+        var fringeTerrain = cell.layers[LayerTypeEnum.fringe];
         if (Hexagon.flatTopped) {
             var baseTerrainImages = Hexmap.baseTerrainFlatImages;
             var transitionImages = Hexmap.transitionFlatImages;
@@ -184,6 +185,11 @@ var Hexmap;
                         }
                     }
                 }
+                break;
+        }
+        switch (fringeTerrain) {
+            case 0 /* TREE */:
+                drawImage(Hexmap.fringeImages[fringeTerrain], cell);
                 break;
         }
         if (Hexmap.showGrid) {

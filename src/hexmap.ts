@@ -23,7 +23,14 @@ function loadImages(folder: string, filenames: string[], callback?) {
 
 module Hexmap {
   enum BaseTerrain { HILL, GRASS, WATER };
+  enum FringeTerrain { TREE };
   enum Grid { DEFAULT };
+  export class LayerTypeEnum {
+    static base = 'b';
+    static fringe = 'f';
+    static object = 'o';
+    static unit = 'u';
+  } // LayerTypeEnum
 
   export var container: HTMLElement;
   var canvas: HTMLCanvasElement;
@@ -36,6 +43,7 @@ module Hexmap {
   export var baseTerrainPointyFilenames: string[]; // must be stored in reversed order of precedence, index 0 is the highest precedence.
   export var transitionPointyFilenames: string[];
   export var gridPointyFilenames: string[];
+  export var fringeFilenames: string[];
 
   export var baseTerrainFlatImages: HTMLImageElement[];
   export var transitionFlatImages: HTMLImageElement[];
@@ -43,29 +51,31 @@ module Hexmap {
   export var baseTerrainPointyImages: HTMLImageElement[];
   export var transitionPointyImages: HTMLImageElement[];
   export var gridPointyImages: HTMLImageElement[];
+  export var fringeImages: HTMLImageElement[];
 
   export var showGrid: boolean;
   export var showTransition: boolean;
 
   export function init(container: HTMLElement, folder: string,
     baseTerrainFlatFilenames, transitionFlatFilenames, gridFlatFilenames,
-    baseTerrainPointyFilenames, transitionPointyFilenames, gridPointyFilenames: string[]) {
-    this.showGrid = true;
-    this.showTransition = true;
+    baseTerrainPointyFilenames, transitionPointyFilenames, gridPointyFilenames,
+    fringeFilenames: string[]) {
+    this.container = container;
     this.folder = folder;
     this.baseTerrainFlatFilenames = baseTerrainFlatFilenames;
     this.transitionFlatFilenames = transitionFlatFilenames;
     this.baseTerrainPointyFilenames = baseTerrainPointyFilenames;
     this.transitionPointyFilenames = transitionPointyFilenames;
-    this.container = container;
+    this.fringeFilenames = fringeFilenames;
+
+    this.showGrid = true;
+    this.showTransition = true;
 
     Hexagon.init(10, 8, 72, 72, true, true); // Flat-topped hexagons, even-q layout
 
     canvas = document.createElement('canvas');
-    container.appendChild(canvas);
-    canvas.width = 800;
-    canvas.height = 600;
     ctx = canvas.getContext('2d');
+    container.appendChild(canvas);
 
     loadImages(folder, baseTerrainFlatFilenames, (images: HTMLImageElement[]) => {
       baseTerrainFlatImages = images;
@@ -79,7 +89,10 @@ module Hexmap {
               transitionPointyImages = images;
               loadImages(folder, gridPointyFilenames, (images: HTMLImageElement[]) => {
                 gridPointyImages = images;
-                generate.call(this);
+                loadImages(folder, fringeFilenames, (images: HTMLImageElement[]) => {
+                  fringeImages = images;
+                  generate.call(this);
+                });
               });
             });
           });
@@ -98,7 +111,7 @@ module Hexmap {
 
       for (var j = 0; j < Hexagon.mapHeight; j++) {
         Hexagon.map[i][j] = new Hexagon.Cell(i, j);
-        Hexagon.map[i][j].layers[Hexagon.LayerTypeEnum.base] = Math.floor(Math.random() * nbBaseTerrain);
+        Hexagon.map[i][j].layers[LayerTypeEnum.base] = Math.floor(Math.random() * nbBaseTerrain);
       } // for j
     } // for i
 
@@ -106,23 +119,35 @@ module Hexmap {
   } // generate;
 
   export function refresh() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (canvas) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
     drawMap();
   } // refresh
 
   function drawMap() {
+    var rect = Hexagon.getRectangle();
+
+    canvas.width = rect[1].x;
+    canvas.height = rect[1].y;
+
     for (var i = 0; i < Hexagon.mapWidth; i++) {
       for (var j = 0; j < Hexagon.mapHeight; j++) {
         drawTile(i, j);
       } // for j
     } // for i
+
+    // display trees
+    drawImage(fringeImages[FringeTerrain.TREE], Hexagon.map[2][2]);
+    drawImage(fringeImages[FringeTerrain.TREE], Hexagon.map[3][2]);
+    drawImage(fringeImages[FringeTerrain.TREE], Hexagon.map[3][3]);
   } // drawMap
 
   function drawTile(q, r: number) {
     // we assume (q, r) are valid cell coordinates
     var cell = Hexagon.map[q][r];
     var point = cell.toPoint();
-    var baseTerrain = cell.layers[Hexagon.LayerTypeEnum.base];
+    var baseTerrain = cell.layers[LayerTypeEnum.base];
 
     if (Hexagon.flatTopped) {
       var baseTerrainImages = baseTerrainFlatImages;

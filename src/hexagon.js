@@ -52,24 +52,6 @@ var Hexagon;
     Hexagon.map;
     Hexagon.cellWidth; // cell width in pixels
     Hexagon.cellHeight; // cell height in pixels
-    // Terrains must be ordered by precedence.
-    // First one has the highest precedence.
-    (function (Terrain) {
-        Terrain[Terrain["GREEN_GRASS"] = 0] = "GREEN_GRASS";
-        Terrain[Terrain["MEDIUM_DEEP_WATER"] = 1] = "MEDIUM_DEEP_WATER";
-    })(Hexagon.Terrain || (Hexagon.Terrain = {}));
-    var Terrain = Hexagon.Terrain;
-    ;
-    var LayerTypeEnum = (function () {
-        function LayerTypeEnum() {
-        }
-        LayerTypeEnum.base = 'b';
-        LayerTypeEnum.fringe = 'f';
-        LayerTypeEnum.object = 'o';
-        LayerTypeEnum.unit = 'u';
-        return LayerTypeEnum;
-    })();
-    Hexagon.LayerTypeEnum = LayerTypeEnum; // LayerTypeEnum
     function init(mapWidth, mapHeight, cellWidth, cellHeight, flatTopped, evenOffset) {
         if (flatTopped === void 0) { flatTopped = true; }
         if (evenOffset === void 0) { evenOffset = true; }
@@ -85,6 +67,66 @@ var Hexagon;
         return (Hexagon.evenOffset ? 1 : 0) | (Hexagon.flatTopped ? 1 : 0) << 1;
     }
     Hexagon.mapLayout = mapLayout; // mapLayout
+    function getRectangle() {
+        var a = { x: 0, y: 0 };
+        var b = { x: 0, y: 0 };
+        // upper left corner
+        if (!Hexagon.evenOffset) {
+            a = Hexagon.map[0][0].toPoint();
+        }
+        else {
+            if (!Hexagon.flatTopped) {
+                if (Hexagon.mapHeight > 0) {
+                    a.x = Hexagon.map[0][1].toPoint().x;
+                }
+                else {
+                    a.x = Hexagon.map[0][0].toPoint().x;
+                }
+                a.y = Hexagon.map[0][0].toPoint().y;
+            }
+            else {
+                a.x = Hexagon.map[0][0].toPoint().x;
+                if (Hexagon.mapHeight > 0) {
+                    a.y = Hexagon.map[1][0].toPoint().y;
+                }
+                else {
+                    a.y = Hexagon.map[0][0].toPoint().y;
+                }
+            }
+        }
+        switch (mapLayout()) {
+            case 0 /* ODD_R */:
+                if ((Hexagon.mapHeight & 1) === 0) {
+                    b.x = Hexagon.map[Hexagon.mapWidth - 1][1].toPoint().x;
+                }
+                else {
+                    b.x = Hexagon.map[Hexagon.mapWidth - 1][0].toPoint().x;
+                }
+                b.y = Hexagon.map[0][Hexagon.mapHeight - 1].toPoint().y;
+                break;
+            case 1 /* EVEN_R */:
+                b.x = Hexagon.map[Hexagon.mapWidth - 1][0].toPoint().x;
+                b.y = Hexagon.map[0][Hexagon.mapHeight - 1].toPoint().y;
+                break;
+            case 2 /* ODD_Q */:
+                b.x = Hexagon.map[Hexagon.mapWidth - 1][0].toPoint().x;
+                if ((Hexagon.mapWidth & 1) === 0) {
+                    b.y = Hexagon.map[1][Hexagon.mapHeight - 1].toPoint().y;
+                }
+                else {
+                    b.y = Hexagon.map[0][Hexagon.mapHeight - 1].toPoint().y;
+                }
+                break;
+            case 3 /* EVEN_Q */:
+                b.x = Hexagon.map[Hexagon.mapWidth - 1][0].toPoint().x;
+                b.y = Hexagon.map[0][Hexagon.mapHeight - 1].toPoint().y;
+                break;
+        }
+        b.x += Hexagon.cellWidth;
+        b.y += Hexagon.cellHeight;
+        return [a, b];
+    }
+    Hexagon.getRectangle = getRectangle; // getRectangle
     /**
       * Hexagonal cell expressed in offset coordinates
       */

@@ -48,6 +48,9 @@ window.onload = () => {
     ],
     [
       'pointy-top/terrain/grid.png',
+    ],
+    [
+      'tree.png'
     ]);
 
   // Default value on parameters

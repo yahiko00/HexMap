@@ -22,17 +22,6 @@
   export var cellWidth: number; // cell width in pixels
   export var cellHeight: number; // cell height in pixels
 
-  // Terrains must be ordered by precedence.
-  // First one has the highest precedence.
-  export enum Terrain { GREEN_GRASS, MEDIUM_DEEP_WATER };
-
-  export class LayerTypeEnum {
-    static base = 'b';
-    static fringe = 'f';
-    static object = 'o';
-    static unit = 'u';
-  } // LayerTypeEnum
-
   export function init(mapWidth, mapHeight, cellWidth, cellHeight: number, flatTopped = true, evenOffset = true) {
     this.mapWidth = mapWidth;
     this.mapHeight = mapHeight;
@@ -45,6 +34,71 @@
   export function mapLayout() {
     return (evenOffset ? 1 : 0) | (flatTopped ? 1 : 0) << 1;
   } // mapLayout
+
+  export function getRectangle(): Point[] {
+    var a: Point = { x: 0, y: 0 };
+    var b: Point = { x: 0, y: 0 };
+
+    // upper left corner
+    if (!evenOffset) {
+      a = map[0][0].toPoint();
+    }
+    else {
+      if (!flatTopped) {
+        if (mapHeight > 0) { // there is at least 2 rows
+          a.x = map[0][1].toPoint().x;
+        }
+        else {
+          a.x = map[0][0].toPoint().x;
+        }
+        a.y = map[0][0].toPoint().y;
+      }
+      else {
+        a.x = map[0][0].toPoint().x;
+        if (mapHeight > 0) { // there is at least 2 rows
+          a.y = map[1][0].toPoint().y;
+        }
+        else {
+          a.y = map[0][0].toPoint().y;
+        }
+      }
+    }
+
+    // lower right corner
+    switch (mapLayout()) {
+      case Layout.ODD_R:
+        if ((mapHeight & 1) === 0) { // even number of rows
+          b.x = map[mapWidth-1][1].toPoint().x;
+        }
+        else {
+          b.x = map[mapWidth-1][0].toPoint().x;
+        }
+        b.y = map[0][mapHeight - 1].toPoint().y;
+        break;
+      case Layout.EVEN_R:
+        b.x = map[mapWidth - 1][0].toPoint().x;
+        b.y = map[0][mapHeight - 1].toPoint().y;
+        break;
+      case Layout.ODD_Q:
+        b.x = map[mapWidth - 1][0].toPoint().x;
+        if ((mapWidth & 1) === 0) { // even number of columns
+          b.y = map[1][mapHeight - 1].toPoint().y;
+        }
+        else {
+          b.y = map[0][mapHeight - 1].toPoint().y;
+        }
+        break;
+      case Layout.EVEN_Q:
+        b.x = map[mapWidth - 1][0].toPoint().x;
+        b.y = map[0][mapHeight - 1].toPoint().y;
+        break;
+    } // switch mapLayout
+
+    b.x += cellWidth;
+    b.y += cellHeight;
+
+    return [a, b];
+  } // getRectangle
 
   /**
     * Hexagonal cell expressed in offset coordinates

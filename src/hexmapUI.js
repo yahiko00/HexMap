@@ -39,6 +39,8 @@ window.onload = function () {
         'pointy-top/terrain/grass-nw.png',
     ], [
         'pointy-top/terrain/grid.png',
+    ], [
+        'tree.png'
     ]);
     // Default value on parameters
     if (Hexagon.flatTopped)

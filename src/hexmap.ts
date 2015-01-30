@@ -1,4 +1,5 @@
-﻿/// <reference path='hexagon.ts' />
+﻿/// <reference path='heightmap/heightmap.ts' />
+/// <reference path='hexagon.ts' />
 
 /**
  * cf. http://codeincomplete.com/posts/2013/12/3/javascript_game_foundations_loading_assets/
@@ -105,6 +106,9 @@ module Hexmap {
     var nbBaseTerrain = Object.keys(BaseTerrain).length / 2;
 
     Hexagon.map = [];
+
+    // Random generation
+    /*
     Hexagon.map = new Array(Hexagon.mapWidth);
     for (var i = 0; i < Hexagon.mapWidth; i++) {
       Hexagon.map[i] = new Array(Hexagon.mapHeight);
@@ -114,11 +118,39 @@ module Hexmap {
         Hexagon.map[i][j].layers[LayerTypeEnum.base] = Math.floor(Math.random() * nbBaseTerrain);
       } // for j
     } // for i
+    */
 
+    // Diamond Square generation
+    var mapSize = Math.pow(2, Math.ceil(Math.log(Math.max(Hexagon.mapWidth, Hexagon.mapHeight) * 5 - 1) / Math.LN2)) + 1;
+    Heightmap.init();
+    var heightmap = Heightmap.diamondSquare(mapSize);
+
+    Hexagon.map = new Array(Hexagon.mapWidth);
+    for (var i = 0; i < Hexagon.mapWidth; i++) {
+      Hexagon.map[i] = new Array(Hexagon.mapHeight);
+
+      for (var j = 0; j < Hexagon.mapHeight; j++) {
+        Hexagon.map[i][j] = new Hexagon.Cell(i, j);
+        var heightmapPoint = heightmap[i * 5 + 2][j * 5 + 2];
+        if (heightmapPoint < 255 * 0.35) {
+          Hexagon.map[i][j].layers[LayerTypeEnum.base] = BaseTerrain.WATER;
+        }
+        else if (heightmapPoint < 255 * 0.8) {
+          Hexagon.map[i][j].layers[LayerTypeEnum.base] = BaseTerrain.GRASS;
+        }
+        else {
+          Hexagon.map[i][j].layers[LayerTypeEnum.base] = BaseTerrain.HILL;
+        }
+      } // for j
+    } // for i
+
+    /*
     // trees
     Hexagon.map[2][2].layers[LayerTypeEnum.fringe] = FringeTerrain.TREE;
     Hexagon.map[3][2].layers[LayerTypeEnum.fringe] = FringeTerrain.TREE;
     Hexagon.map[3][3].layers[LayerTypeEnum.fringe] = FringeTerrain.TREE;
+    */
+
 
   refresh();
   } // generate;
@@ -143,7 +175,7 @@ module Hexmap {
     } // for i
   } // drawMap
 
-  function drawTile(q, r: number) {
+  function drawTile(q: number, r: number) {
     // we assume (q, r) are valid cell coordinates
     var cell = Hexagon.map[q][r];
     var point = cell.toPoint();

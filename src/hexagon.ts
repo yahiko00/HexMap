@@ -22,7 +22,7 @@
   export var cellWidth: number; // cell width in pixels
   export var cellHeight: number; // cell height in pixels
 
-  export function init(mapWidth, mapHeight, cellWidth, cellHeight: number, flatTopped = true, evenOffset = true) {
+  export function init(mapWidth: number, mapHeight: number, cellWidth: number, cellHeight: number, flatTopped = true, evenOffset = true) {
     this.mapWidth = mapWidth;
     this.mapHeight = mapHeight;
     this.flatTopped = flatTopped;

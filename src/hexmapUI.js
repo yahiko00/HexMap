@@ -59,6 +59,14 @@ window.onload = function () {
         $("#yesTransition").prop("checked", true);
     else
         $("#noTransition").prop("checked", true);
+    switch (Hexmap.genAlgo) {
+        case 0 /* RANDOM */:
+            $("#randomAlgo").prop("checked", true);
+            break;
+        case 1 /* DIAMOND_SQUARE */:
+            $("#diamondSquareAlgo").prop("checked", true);
+            break;
+    }
     // Listeners
     $('#flatTopped').on('change', changeOrientation);
     $('#pointyTopped').on('change', changeOrientation);
@@ -68,6 +76,8 @@ window.onload = function () {
     $('#noGrid').on('change', changeShowGrid);
     $('#yesTransition').on('change', changeShowTransition);
     $('#noTransition').on('change', changeShowTransition);
+    $('#randomAlgo').on('change', changeAlgorithm);
+    $('#diamondSquareAlgo').on('change', changeAlgorithm);
     $('#generate').on('click', generate);
 };
 function changeOrientation() {
@@ -106,6 +116,15 @@ function changeShowTransition() {
         Hexmap.showTransition = false;
     Hexmap.refresh();
 } // changeShowTransition
+function changeAlgorithm() {
+    var randomRadioHTML = document.getElementById('randomAlgo');
+    var diamondSquareRadioHTML = document.getElementById('diamondSquareAlgo');
+    if (randomRadioHTML.checked)
+        Hexmap.genAlgo = 0 /* RANDOM */;
+    else if (diamondSquareRadioHTML.checked)
+        Hexmap.genAlgo = 1 /* DIAMOND_SQUARE */;
+    Hexmap.generate();
+} // changeAlgorithm
 function generate() {
     Hexmap.generate();
 } // generate

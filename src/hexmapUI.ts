@@ -62,6 +62,14 @@ window.onload = () => {
   else $("#noGrid").prop("checked", true);
   if (Hexmap.showTransition) $("#yesTransition").prop("checked", true);
   else $("#noTransition").prop("checked", true);
+  switch (Hexmap.genAlgo) {
+    case Hexmap.GenerationAlgo.RANDOM:
+      $("#randomAlgo").prop("checked", true);
+      break;
+    case Hexmap.GenerationAlgo.DIAMOND_SQUARE:
+      $("#diamondSquareAlgo").prop("checked", true);
+      break;
+  } // switch Hexmap.genAlgo
 
   // Listeners
   $('#flatTopped').on('change', changeOrientation);
@@ -72,6 +80,8 @@ window.onload = () => {
   $('#noGrid').on('change', changeShowGrid);
   $('#yesTransition').on('change', changeShowTransition);
   $('#noTransition').on('change', changeShowTransition);
+  $('#randomAlgo').on('change', changeAlgorithm);
+  $('#diamondSquareAlgo').on('change', changeAlgorithm);
   $('#generate').on('click', generate);
 
 };
@@ -115,6 +125,16 @@ function changeShowTransition() {
 
   Hexmap.refresh();
 } // changeShowTransition
+
+function changeAlgorithm() {
+  var randomRadioHTML = <HTMLInputElement>document.getElementById('randomAlgo');
+  var diamondSquareRadioHTML = <HTMLInputElement>document.getElementById('diamondSquareAlgo');
+
+  if (randomRadioHTML.checked) Hexmap.genAlgo = Hexmap.GenerationAlgo.RANDOM;
+  else if (diamondSquareRadioHTML.checked) Hexmap.genAlgo = Hexmap.GenerationAlgo.DIAMOND_SQUARE;
+
+  Hexmap.generate();
+} // changeAlgorithm
 
 function generate() {
   Hexmap.generate();

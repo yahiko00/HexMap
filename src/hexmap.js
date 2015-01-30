@@ -68,6 +68,13 @@ var Hexmap;
     Hexmap.fringeImages;
     Hexmap.showGrid;
     Hexmap.showTransition;
+    (function (GenerationAlgo) {
+        GenerationAlgo[GenerationAlgo["RANDOM"] = 0] = "RANDOM";
+        GenerationAlgo[GenerationAlgo["DIAMOND_SQUARE"] = 1] = "DIAMOND_SQUARE";
+    })(Hexmap.GenerationAlgo || (Hexmap.GenerationAlgo = {}));
+    var GenerationAlgo = Hexmap.GenerationAlgo;
+    ;
+    Hexmap.genAlgo;
     function init(container, folder, baseTerrainFlatFilenames, transitionFlatFilenames, gridFlatFilenames, baseTerrainPointyFilenames, transitionPointyFilenames, gridPointyFilenames, fringeFilenames) {
         var _this = this;
         this.container = container;
@@ -79,6 +86,7 @@ var Hexmap;
         this.fringeFilenames = fringeFilenames;
         this.showGrid = true;
         this.showTransition = true;
+        this.genAlgo = 1 /* DIAMOND_SQUARE */;
         Hexagon.init(10, 8, 72, 72, true, true); // Flat-topped hexagons, even-q layout
         canvas = document.createElement('canvas');
         ctx = canvas.getContext('2d');
@@ -110,38 +118,39 @@ var Hexmap;
     function generate() {
         var nbBaseTerrain = Object.keys(BaseTerrain).length / 2;
         Hexagon.map = [];
-        // Random generation
-        /*
-        Hexagon.map = new Array(Hexagon.mapWidth);
-        for (var i = 0; i < Hexagon.mapWidth; i++) {
-          Hexagon.map[i] = new Array(Hexagon.mapHeight);
-    
-          for (var j = 0; j < Hexagon.mapHeight; j++) {
-            Hexagon.map[i][j] = new Hexagon.Cell(i, j);
-            Hexagon.map[i][j].layers[LayerTypeEnum.base] = Math.floor(Math.random() * nbBaseTerrain);
-          } // for j
-        } // for i
-        */
-        // Diamond Square generation
-        var mapSize = Math.pow(2, Math.ceil(Math.log(Math.max(Hexagon.mapWidth, Hexagon.mapHeight) * 5 - 1) / Math.LN2)) + 1;
-        Heightmap.init();
-        var heightmap = Heightmap.diamondSquare(mapSize);
-        Hexagon.map = new Array(Hexagon.mapWidth);
-        for (var i = 0; i < Hexagon.mapWidth; i++) {
-            Hexagon.map[i] = new Array(Hexagon.mapHeight);
-            for (var j = 0; j < Hexagon.mapHeight; j++) {
-                Hexagon.map[i][j] = new Hexagon.Cell(i, j);
-                var heightmapPoint = heightmap[i * 5 + 2][j * 5 + 2];
-                if (heightmapPoint < 255 * 0.35) {
-                    Hexagon.map[i][j].layers[LayerTypeEnum.base] = 2 /* WATER */;
+        switch (Hexmap.genAlgo) {
+            case 0 /* RANDOM */:
+                Hexagon.map = new Array(Hexagon.mapWidth);
+                for (var i = 0; i < Hexagon.mapWidth; i++) {
+                    Hexagon.map[i] = new Array(Hexagon.mapHeight);
+                    for (var j = 0; j < Hexagon.mapHeight; j++) {
+                        Hexagon.map[i][j] = new Hexagon.Cell(i, j);
+                        Hexagon.map[i][j].layers[LayerTypeEnum.base] = Math.floor(Math.random() * nbBaseTerrain);
+                    }
                 }
-                else if (heightmapPoint < 255 * 0.8) {
-                    Hexagon.map[i][j].layers[LayerTypeEnum.base] = 1 /* GRASS */;
+                break;
+            case 1 /* DIAMOND_SQUARE */:
+                var mapSize = Math.pow(2, Math.ceil(Math.log(Math.max(Hexagon.mapWidth, Hexagon.mapHeight) * 5 - 1) / Math.LN2)) + 1;
+                Heightmap.init();
+                var heightmap = Heightmap.diamondSquare(mapSize);
+                Hexagon.map = new Array(Hexagon.mapWidth);
+                for (var i = 0; i < Hexagon.mapWidth; i++) {
+                    Hexagon.map[i] = new Array(Hexagon.mapHeight);
+                    for (var j = 0; j < Hexagon.mapHeight; j++) {
+                        Hexagon.map[i][j] = new Hexagon.Cell(i, j);
+                        var heightmapPoint = heightmap[i * 5 + 2][j * 5 + 2];
+                        if (heightmapPoint < 255 * 0.35) {
+                            Hexagon.map[i][j].layers[LayerTypeEnum.base] = 2 /* WATER */;
+                        }
+                        else if (heightmapPoint < 255 * 0.7) {
+                            Hexagon.map[i][j].layers[LayerTypeEnum.base] = 1 /* GRASS */;
+                        }
+                        else {
+                            Hexagon.map[i][j].layers[LayerTypeEnum.base] = 0 /* HILL */;
+                        }
+                    }
                 }
-                else {
-                    Hexagon.map[i][j].layers[LayerTypeEnum.base] = 0 /* HILL */;
-                }
-            }
+                break;
         }
         /*
         // trees
